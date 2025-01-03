@@ -37,5 +37,5 @@ io.on("connection", (socket) => {
 });
 
 server.listen(3000, () => {
-  console.log("Server running at http://localhost:3000");
+  console.log("Server running at https://video-chat-l94mbbjfp-rishabh-shrivals-projects.vercel.app/");
 });
