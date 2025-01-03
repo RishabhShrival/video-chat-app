@@ -19,9 +19,15 @@ io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
   users.push(socket.id);
 
+  
+
   // Send updated user list to all clients
   io.emit("user-list", users);
 
+  socket.on('connect', () => {
+  console.log('Connected to the server');
+  });
+  
   // Handle signaling data
   socket.on("signal", (data) => {
     const { to, signal } = data;

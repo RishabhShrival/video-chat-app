@@ -27,7 +27,7 @@
       <h2>Connected Users:</h2>
     </div>
 
-    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://video-chat-app-nt67.onrender.com/socket.io/socket.io.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/simple-peer/simplepeer.min.js"></script>
     <script>
       const socket = io("https://video-chat-app-nt67.onrender.com");
@@ -56,10 +56,10 @@
 
       // Update user list
       socket.on("user-list", (users) => {
+        console.log("Connected users:", users); // This should log the list of users
         userList.innerHTML = "<h2>Connected Users:</h2>";
         users.forEach((id) => {
           if (id !== myId) {
-            // Exclude yourself
             const userDiv = document.createElement("div");
             userDiv.textContent = `User: ${id}`;
             userDiv.onclick = () => startCall(id); // Start call on click
