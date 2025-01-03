@@ -4,7 +4,12 @@ const { Server } = require("socket.io");
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+const io = require('socket.io')(server, {
+  cors: {
+    origin: 'https://video-chat-l94mbbjfp-rishabh-shrivals-projects.vercel.app/', // Your Vercel frontend URL
+    methods: ['GET', 'POST']
+  }
+});
 
 let users = []; // List of connected users
 
