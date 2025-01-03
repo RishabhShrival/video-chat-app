@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Multi-User Video Chat</title>
+    <style>
+      #videos video {
+        width: 45%;
+        margin: 10px;
+      }
+      #userList div {
+        cursor: pointer;
+        margin: 5px;
+        padding: 5px;
+        border: 1px solid #ccc;
+        display: inline-block;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Multi-User Video Chat</h1>
+    <div id="videos">
+      <video id="localVideo" autoplay muted></video>
+    </div>
+    <div id="userList">
+      <h2>Connected Users:</h2>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/simple-peer/simplepeer.min.js"></script>
+    <script>
+      const socket = io();
+      let localStream;
+      let myId;
+      const peers = {}; // Store peers by their IDs
+
+      const localVideo = document.getElementById("localVideo");
+      const userList = document.getElementById("userList");
+      const videoContainer = document.getElementById("videos");
+
+      // Get user's media (camera + mic)
+      navigator.mediaDevices
+        .getUserMedia({ video: true, audio: true })
+        .then((stream) => {
+          localStream = stream;
+          localVideo.srcObject = stream;
+        })
+        .catch((err) => console.error("Error accessing media devices:", err));
+
+      // Receive unique ID from the server
+      socket.on("connect", () => {
+        myId = socket.id;
+        console.log("My ID:", myId);
+      });
+
+      // Update user list
+      socket.on("user-list", (users) => {
+        userList.innerHTML = "<h2>Connected Users:</h2>";
+        users.forEach((id) => {
+          if (id !== myId) {
+            // Exclude yourself
+            const userDiv = document.createElement("div");
+            userDiv.textContent = `User: ${id}`;
+            userDiv.onclick = () => startCall(id); // Start call on click
+            userList.appendChild(userDiv);
+          }
+        });
+      });
+
+      // Start a call with a user
+      function startCall(peerId) {
+        const peer = new SimplePeer({
+          initiator: true,
+          stream: localStream,
+          trickle: false,
+        });
+
+        peer.on("signal", (data) => {
+          socket.emit("signal", { to: peerId, signal: data });
+        });
+
+        peer.on("stream", (remoteStream) => {
+          addRemoteStream(peerId, remoteStream);
+        });
+
+        peers[peerId] = peer; // Store peer instance
+      }
+
+      // Handle incoming signaling data
+      socket.on("signal", ({ from, signal }) => {
+        if (!peers[from]) {
+          const peer = new SimplePeer({
+            initiator: false,
+            stream: localStream,
+            trickle: false,
+          });
+
+          peer.on("signal", (data) => {
+            socket.emit("signal", { to: from, signal: data });
+          });
+
+          peer.on("stream", (remoteStream) => {
+            addRemoteStream(from, remoteStream);
+          });
+
+          peers[from] = peer; // Store peer instance
+        }
+
+        peers[from].signal(signal);
+      });
+
+      // Add remote video stream
+      function addRemoteStream(peerId, stream) {
+        if (!document.getElementById(peerId)) {
+          const remoteVideo = document.createElement("video");
+          remoteVideo.id = peerId;
+          remoteVideo.srcObject = stream;
+          remoteVideo.autoplay = true;
+          videoContainer.appendChild(remoteVideo);
+        }
+      }
+    </script>
+  </body>
+</html>
