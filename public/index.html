@@ -30,7 +30,7 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/simple-peer/simplepeer.min.js"></script>
     <script>
-      const socket = io();
+      const socket = io("https://video-chat-app-nt67.onrender.com");
       let localStream;
       let myId;
       const peers = {}; // Store peers by their IDs
