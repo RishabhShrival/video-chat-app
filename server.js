@@ -4,9 +4,9 @@ const { Server } = require("socket.io");
 
 const app = express();
 const server = http.createServer(app);
-const io = require('socket.io')(server, {
+const io = new Server(server, {
   cors: {
-    origin: 'https://video-chat-l94mbbjfp-rishabh-shrivals-projects.vercel.app/', // Your Vercel frontend URL
+    origin: 'https://video-chat-l94mbbjfp-rishabh-shrivals-projects.vercel.app', // Your Vercel frontend URL
     methods: ['GET', 'POST']
   }
 });
@@ -19,15 +19,9 @@ io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
   users.push(socket.id);
 
-  
-
   // Send updated user list to all clients
   io.emit("user-list", users);
 
-  socket.on('connect', () => {
-  console.log('Connected to the server');
-  });
-  
   // Handle signaling data
   socket.on("signal", (data) => {
     const { to, signal } = data;
@@ -43,5 +37,5 @@ io.on("connection", (socket) => {
 });
 
 server.listen(3000, () => {
-  console.log("Server running at https://video-chat-l94mbbjfp-rishabh-shrivals-projects.vercel.app/");
+  console.log("Server running at https://video-chat-app-nt67.onrender.com");
 });
